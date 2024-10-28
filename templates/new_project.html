@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuevo Proyecto</title>
+    <link rel="stylesheet" href="../static/css/new_project.css">
+</head>
+<body>
+
+    <main class="container">
+        <!-- Título principal -->
+        <h1 class="main-title">Nuevo Proyecto</h1>
+    
+        <div class="project-form">
+            <div class="task-form-container">
+                <form class="task-form">
+                    <!-- Campo de Título del Proyecto -->
+                    <div class="form-group">
+                        <label for="task-title">Título del proyecto</label>
+                        <input type="text" id="task-title" placeholder="Introduce el título del proyecto">
+                    </div>
+    
+                    <!-- Campo de Fecha de Inicio -->
+                    <div class="form-group">
+                        <label for="task-start-date">Fecha de Inicio</label>
+                        <input type="date" id="task-start-date">
+                    </div>
+
+                    <!-- Campo de Fecha de Inicio -->
+                    <div class="form-group">
+                        <label for="task-start-date">Fecha de Fin</label>
+                        <input type="date" id="task-start-date">
+                    </div>
+    
+                    <!-- Campo de Descripción del Proyecto -->
+                    <div class="form-group">
+                        <label for="task-description">Descripción del proyecto</label>
+                        <textarea id="task-description" rows="4" placeholder="Describe el proyecto"></textarea>
+                    </div>
+    
+                    <!-- Campo de Requisitos -->
+                    <div class="form-group">
+                        <label for="task-requirements">Requisitos</label>
+                        <input type="text" id="task-requirements" placeholder="Introduce un requisito">
+                        <button type="button" class="btn-add">Agregar</button>
+                    </div>
+    
+                    <!-- Botones de Acción -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn-save">Guardar</button>
+                        <button type="button" class="btn-continue">Continuar</button>
+                        <a href="{{ url_for('views.projects') }}"><button class="btn-cancel">Cancelar</button></a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    
+
+</body>
+</html>
+

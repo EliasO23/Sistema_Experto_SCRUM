@@ -1,64 +1,93 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Experto - GPSRCM</title>
-
-    <!-- CSS -->
-     <link rel="stylesheet" href="../static/css/main.css">
+    <title>Gestión de Tareas - AProjectO</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/css/main.css">
 
 </head>
 <body>
-    <main class="container">
-        <!-- Agregar el título de "Proyectos Disponibles" -->
-        <h1 class="main-title">Proyectos Disponibles</h1>
 
-        <div class="header">
-            <button class="create-button">Create</button>
-        </div>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Barra Lateral -->
+            <nav class="col-md-2 d-none d-md-block sidebar">
+                <div class="logo mb-4">
+                    <h1>SCRUM</h1>
+                </div>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Proyectos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Sprints</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Desempeño</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Cerrar sesion</a>
+                    </li>
+                </ul>
+            </nav>
 
-        <div class="project-list">
-            <div class="project-header">
-                <h2>Adoddle</h2>
-                <div class="status">Offline</div>
-            </div>
-            <div class="project-description">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </div>
-            <div class="project-footer">
-                <div class="date">05 April 2023</div>
-                <button>Modificar</button>
-            </div>
-        </div>
+            <!-- Contenido Principal -->
+            <main class="col-md-10 ml-sm-auto px-md-4">
 
-        <div class="project-list">
-            <div class="project-header">
-                <h2>Adoddle</h2>
-                <div class="status">Offline</div>
-            </div>
-            <div class="project-description">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </div>
-            <div class="project-footer">
-                <div class="date">05 April 2023</div>
-                <button>Modificar</button>
-            </div>
-        </div>
+                <!-- Sección Vista General -->
+                <div class="overview">
+                    <h1>Nombre del proyecto seleccionado</h1>
+                    <p>Descripcion de ese proyecto</p>
 
-        <div class="project-list">
-            <div class="project-header">
-                <h2>Adoddle</h2>
-                <div class="status">Offline</div>
-            </div>
-            <div class="project-description">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </div>
-            <div class="project-footer">
-                <div class="date">05 April 2023</div>
-                <button>Modificar</button>
-            </div>
+                    <div class="form-group">
+                        <h5>Requisitos del proyecto</h5>
+                        <section>
+                            <p> - Aqui va la lista de requisitos de cada proyecto</p>
+                        </section>
+                    </div>
+
+                    <div class="btn-group mb-3" role="group" aria-label="Vista de Lista o Tablero">
+                        <button type="button" class="btn btn-outline-primary">Vista de Lista</button>
+                        <button type="button" class="btn btn-outline-secondary">Vista de Tablero</button>
+                    </div>
+                </div>
+
+                <!-- Columnas de Tareas -->
+                <div class="row">
+                    <!-- Columna: En espera -->
+                    <div class="col-md-4">
+                        <div class="card-column">
+                            <h5 class="card-title">En espera</h5>
+                            <div class="add-card">+</div>
+                        </div>
+                    </div>
+
+                    <!-- Columna: En progreso -->
+                    <div class="col-md-4">
+                        <div class="card-column">
+                            <h5 class="card-title">En progreso</h5>
+                            <div class="add-card">+</div>
+                        </div>
+                    </div>
+
+                    <!-- Columna: Completado -->
+                    <div class="col-md-4">
+                        <div class="card-column">
+                            <h5 class="card-title">Completado</h5>
+                            <div class="add-card">+</div>
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
-    </main>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.6.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
