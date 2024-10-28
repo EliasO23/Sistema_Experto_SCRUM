@@ -8,8 +8,8 @@ class Proyectos(db.Model):
     fecha_creacion = db.Column(db.DateTime, default=db.func.current_timestamp())
     requisitos = db.Column(db.Text, nullable=False)
     estado = db.Column(db.Enum('pendiente', 'en_proceso', 'completado'), default='pendiente')
-    fecha_inicio = db.Column(db.DateTime, nullable=True)
-    fecha_fin = db.Column(db.DateTime, nullable=True)
+    fecha_inicio = db.Column(db.Date, nullable=True)
+    fecha_fin = db.Column(db.Date, nullable=True)
 
     def __init__(self, nombre, descripcion, requisitos, estado='pendiente', fecha_inicio=None, fecha_fin=None):
         self.nombre = nombre

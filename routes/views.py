@@ -23,9 +23,10 @@ def login():
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
-          
+        
         # Consultar al usuario en la base de datos
         user = Usuarios.query.filter_by(email=email).first()
+        print(user)
 
         if user and check_password_hash(user.contraseña, password):
             session['user'] = user.id_usuario
@@ -89,7 +90,9 @@ def register():
 
 @views_blueprint.route('/main')
 def main():
-    return render_template('main.html')
+    if 'user' in session:
+        return render_template('main.html')
+    return redirect(url_for('views.login'))
 
 @views_blueprint.route('/projects')
 def projects():
@@ -97,9 +100,16 @@ def projects():
         return render_template('projects.html')
     return redirect(url_for('views.login'))
 
-@views_blueprint.route('/new')
+@views_blueprint.route('/projects/new_project')
 def new_project():
-    return "New Project"
+    if 'user' in session:
+        return render_template('projects/new_project.html')
+    return redirect(url_for('views.login'))
+
+@views_blueprint.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect(url_for('views.login'))
 
 # Ruta para iniciar el motor de inferencia
 @views_blueprint.route('/iniciar_motor', methods=['GET'])
