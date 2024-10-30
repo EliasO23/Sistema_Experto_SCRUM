@@ -97,14 +97,55 @@ def main():
 @views_blueprint.route('/projects')
 def projects():
     if 'user' in session:
-        return render_template('projects.html')
+        # Obtener los proyectos del usuario actual
+        user_id = session['user']
+        proyectos = Proyectos.query.filter_by(id_usuario=user_id).all()  # Filtrar proyectos por el usuario actual
+        if not proyectos:
+            flash('No hay proyectos disponibles para mostrar.', 'info')  # Mostrar mensaje si no hay proyectos
+        return render_template('projects.html', proyectos=proyectos)  # Renderizar la página de proyectos con los proyectos del usuario
+
     return redirect(url_for('views.login'))
 
-@views_blueprint.route('/projects/new_project')
+
+@views_blueprint.route('/projects/new_project', methods=['GET', 'POST'])
 def new_project():
+
     if 'user' in session:
-        return render_template('projects/new_project.html')
-    return redirect(url_for('views.login'))
+        # Verifica si el usuario está autenticado (si existe 'user' en la sesión)
+        if request.method == 'POST':
+            # Obtener los datos del formulario
+            id_usuario = session['user']
+            nombre = request.form.get('nombre')
+            descripcion = request.form.get('descripcion')
+            requisitos = request.form.get('requisitos')
+            estado = request.form.get('estado', 'pendiente')
+            fecha_inicio = request.form.get('fecha_inicio')
+            fecha_fin = request.form.get('fecha_fin')
+
+            # Crear una instancia del modelo Proyectos
+            nuevo_proyecto = Proyectos(
+                id_usuario = id_usuario,
+                nombre=nombre,
+                descripcion=descripcion,
+                requisitos=requisitos,
+                estado=estado,
+                fecha_inicio=fecha_inicio if fecha_inicio else None,
+                fecha_fin=fecha_fin if fecha_fin else None
+            )
+
+            # Agregar y confirmar la transacción en la base de datos
+            try:
+                db.session.add(nuevo_proyecto)
+                db.session.commit()
+                flash('Proyecto creado exitosamente', 'success')
+                return redirect(url_for('views.projects'))
+            
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Error al crear el proyecto: {str(e)}', 'error')
+
+        return render_template('projects/new_project.html') # Si el método es GET, renderiza la plantilla HTML para crear un nuevo proyecto
+    return redirect(url_for('views.login')) # Si el usuario no está autenticado, redirige a la página de inicio de sesión
 
 @views_blueprint.route('/logout')
 def logout():

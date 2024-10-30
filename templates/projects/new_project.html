@@ -11,46 +11,47 @@
     <main class="container">
         <!-- Título principal -->
         <h1 class="main-title">Nuevo Proyecto</h1>
+        <!-- <p>User ID: {{ user_id }}</p> -->
     
         <div class="project-form">
             <div class="task-form-container">
-                <form class="task-form">
+                <form class="task-form" action="{{ url_for('views.new_project') }}" method="POST">
                     <!-- Campo de Título del Proyecto -->
                     <div class="form-group">
                         <label for="task-title">Título del proyecto</label>
-                        <input type="text" id="task-title" placeholder="Introduce el título del proyecto">
+                        <input type="text" id="task-title" name="nombre" placeholder="Introduce el título del proyecto">
                     </div>
     
                     <!-- Campo de Fecha de Inicio -->
                     <div class="form-group">
                         <label for="task-start-date">Fecha de Inicio</label>
-                        <input type="date" id="task-start-date">
+                        <input type="date" id="task-start-date" name="fecha_inicio">
                     </div>
 
-                    <!-- Campo de Fecha de Inicio -->
+                    <!-- Campo de Fecha de Fin -->
                     <div class="form-group">
                         <label for="task-start-date">Fecha de Fin</label>
-                        <input type="date" id="task-start-date">
+                        <input type="date" id="task-start-date" name="fecha_fin">
                     </div>
     
                     <!-- Campo de Descripción del Proyecto -->
                     <div class="form-group">
                         <label for="task-description">Descripción del proyecto</label>
-                        <textarea id="task-description" rows="4" placeholder="Describe el proyecto"></textarea>
+                        <textarea id="task-description" rows="4" name="descripcion" placeholder="Describe el proyecto"></textarea>
                     </div>
     
                     <!-- Campo de Requisitos -->
                     <div class="form-group">
                         <label for="task-requirements">Requisitos</label>
-                        <input type="text" id="task-requirements" placeholder="Introduce un requisito">
-                        <button type="button" class="btn-add">Agregar</button>
+                        <input type="text" id="task-requirements" name="requisitos" placeholder="Introduce un requisito">
+                        <!-- <button type="button" class="btn-add">Agregar</button> -->
                     </div>
     
                     <!-- Botones de Acción -->
                     <div class="form-actions">
                         <button type="submit" class="btn-save">Guardar</button>
                         <button type="button" class="btn-continue">Continuar</button>
-                        <a href="{{ url_for('views.projects') }}"><button class="btn-cancel">Cancelar</button></a>
+                        <a href="{{ url_for('views.projects') }}"><button type="button" class="btn-cancel">Cancelar</button></a>
                     </div>
                 </form>
             </div>

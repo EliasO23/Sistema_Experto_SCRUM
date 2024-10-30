@@ -1,64 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema Experto - GPSRCM</title>
 
     <!-- CSS -->
-     <link rel="stylesheet" href="../static/css/projects.css">
+    <link rel="stylesheet" href="../static/css/projects.css">
 
 </head>
+
 <body>
     <main class="container">
-        <!-- Agregar el título de "Proyectos Disponibles" -->
+        <!-- Titulo Principal -->
         <h1 class="main-title">Proyectos Disponibles</h1>
 
         <div class="header">
-            <a href="{{ url_for('views.new_project') }}"><button class="create-button">Create</button></a>
+            <a href="{{ url_for('views.new_project') }}"><button class="create-button">Crear</button></a>
         </div>
 
+        <!-- Listado de Proyectos -->
+        {% for proyecto in proyectos %}
         <div class="project-list">
             <div class="project-header">
-                <h2>Adoddle</h2>
-                <div class="status">Offline</div>
+                <h2>{{ proyecto.nombre }}</h2>
+                <div class="status">{{ proyecto.estado }}</div>
             </div>
             <div class="project-description">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                {{ proyecto.descripcion }}
             </div>
             <div class="project-footer">
-                <div class="date">05 April 2023</div>
+                <div class="date">{{ proyecto.fecha_inicio.strftime('%d %B %Y') if proyecto.fecha_inicio else 'Sin fecha
+                    de inicio' }}</div>
                 <button>Modificar</button>
             </div>
         </div>
-
-        <div class="project-list">
-            <div class="project-header">
-                <h2>Adoddle</h2>
-                <div class="status">Offline</div>
-            </div>
-            <div class="project-description">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </div>
-            <div class="project-footer">
-                <div class="date">05 April 2023</div>
-                <button>Modificar</button>
-            </div>
-        </div>
-
-        <div class="project-list">
-            <div class="project-header">
-                <h2>Adoddle</h2>
-                <div class="status">Offline</div>
-            </div>
-            <div class="project-description">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </div>
-            <div class="project-footer">
-                <div class="date">05 April 2023</div>
-                <button>Modificar</button>
-            </div>
-        </div>
+        {% endfor %}
     </main>
 </body>
+
 </html>
