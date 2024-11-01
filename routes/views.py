@@ -1,10 +1,11 @@
 from datetime import datetime
 from flask import Blueprint, flash, jsonify, redirect, request, render_template, session, url_for
-from expert_system.motor_inferencia import inicializar_motor
+from expert_system.motor_inferencia import Proyecto, inicializar_motor
 from models.proyectos import Proyectos
 from models.usuarios import Usuarios
 from utils.db import db
 from werkzeug.security import check_password_hash, generate_password_hash
+from expert_system.motor_inferencia import GestionProyectos
 
 
 views_blueprint = Blueprint('views', __name__)
@@ -55,12 +56,22 @@ def insertar_proyecto():
     return "Proyecto insertado con éxito"
 
 
-@views_blueprint.route('/agregar_usuarios')
-def agregar_usuarios():
-    usuario1 = Usuarios(nombre="Carlos Perez", email="perez@example.com", contraseña=generate_password_hash("password123"))
-    db.session.add(usuario1)
-    db.session.commit()
-    return "Usuarios agregados correctamente"
+@views_blueprint.route('/prueba', methods=['GET', 'POST'])
+def prueba():
+    if request.method == 'POST':
+        requisitos = request.form.get('requisitos')
+
+        if requisitos:
+            requisitos = requisitos.lower()
+            sistema = GestionProyectos()
+            sistema.reset()
+
+            sistema.declare(Proyecto(requisitos=requisitos))
+            sistema.run()
+        else:
+            print("El campo 'requisitos' está vacío. Por favor ingresa un valor.", "danger")
+        
+    return render_template('prueba.html')
 
 @views_blueprint.route('/register', methods=['GET', 'POST'])
 def register():
@@ -143,6 +154,17 @@ def new_project():
             except Exception as e:
                 db.session.rollback()
                 flash(f'Error al crear el proyecto: {str(e)}', 'error')
+
+            if requisitos:
+                requisitos = requisitos.lower()
+                sistema = GestionProyectos()
+                sistema.reset()
+
+                sistema.declare(Proyecto(requisitos=requisitos))
+                sistema.run()
+            else:
+                print("El campo 'requisitos' está vacío. Por favor ingresa un valor.", "danger")
+            
 
         return render_template('projects/new_project.html') # Si el método es GET, renderiza la plantilla HTML para crear un nuevo proyecto
     return redirect(url_for('views.login')) # Si el usuario no está autenticado, redirige a la página de inicio de sesión

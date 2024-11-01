@@ -1,6 +1,5 @@
 from experta import *
-
-
+from queries.db_operations import buscar_por_palabra_clave, insertar_en_sprint
 
 
 # Definición del hecho Proyecto
@@ -12,10 +11,24 @@ class Sprint(Fact):
     #     self.fecha_inicio = fecha_inicio
     pass
 
+class Proyecto(Fact):
+    requisitos = Field(str, mandatory=True)
+
 # Definición del sistema experto con las reglas
 class GestionProyectos(KnowledgeEngine):
 
     recomendaciones = []
+
+    @Rule(Proyecto(requisitos=MATCH.requisitos & CONTAINS('login')))
+    def buscar_login(self):
+        resultados = buscar_por_palabra_clave("login")
+
+        for resultado in resultados:
+            nombre, duracion = resultado
+            insertar_en_sprint(1, nombre, duracion)
+
+        mensaje = "Sprints agregados correctamente..."
+        print(mensaje)
 
     @Rule(Sprint(numero=1))
     def crear_tareas_sprint_1(self):

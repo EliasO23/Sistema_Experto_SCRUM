@@ -19,6 +19,13 @@ body {
     color: #007bff;
 }
 
+.nav{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
 .sidebar {
     background-color: #e9efff;
     height: auto;
