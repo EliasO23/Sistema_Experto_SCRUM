@@ -1,11 +1,12 @@
 from datetime import datetime
 from flask import Blueprint, flash, jsonify, redirect, request, render_template, session, url_for
-from expert_system.motor_inferencia import Proyecto, inicializar_motor
+from expert_system.motor_inferencia import Proyecto
+from models.equipo import Equipo
 from models.proyectos import Proyectos
 from models.usuarios import Usuarios
 from utils.db import db
 from werkzeug.security import check_password_hash, generate_password_hash
-from expert_system.motor_inferencia import GestionProyectos
+from expert_system.motor_inferencia import GestionProyectos, ejecutar_motor_requisitos
 
 
 views_blueprint = Blueprint('views', __name__)
@@ -31,10 +32,10 @@ def login():
 
         if user and check_password_hash(user.contraseña, password):
             session['user'] = user.id_usuario
-            flash('Inicio de sesión exitoso', 'success')
+            # flash('Inicio de sesión exitoso', 'success')
             return redirect(url_for('views.projects'))
         else:
-            flash('Credenciales incorrectas', 'danger')
+            flash('Credenciales incorrectas', 'error')
             
     return render_template('login.html')
 
@@ -99,12 +100,6 @@ def register():
     
     return render_template('register.html')
 
-@views_blueprint.route('/main')
-def main():
-    if 'user' in session:
-        return render_template('main.html')
-    return redirect(url_for('views.login'))
-
 @views_blueprint.route('/projects')
 def projects():
     if 'user' in session:
@@ -113,7 +108,7 @@ def projects():
         proyectos = Proyectos.query.filter_by(id_usuario=user_id).all()  # Filtrar proyectos por el usuario actual
         if not proyectos:
             flash('No hay proyectos disponibles para mostrar.', 'info')  # Mostrar mensaje si no hay proyectos
-        return render_template('projects.html', proyectos=proyectos)  # Renderizar la página de proyectos con los proyectos del usuario
+        return render_template('projects.html', show_navbar=True, proyectos=proyectos)  # Renderizar la página de proyectos con los proyectos del usuario
 
     return redirect(url_for('views.login'))
 
@@ -166,13 +161,55 @@ def new_project():
                 print("El campo 'requisitos' está vacío. Por favor ingresa un valor.", "danger")
             
 
-        return render_template('projects/new_project.html') # Si el método es GET, renderiza la plantilla HTML para crear un nuevo proyecto
+        return render_template('projects/new_project.html', show_navbar=True) # Si el método es GET, renderiza la plantilla HTML para crear un nuevo proyecto
     return redirect(url_for('views.login')) # Si el usuario no está autenticado, redirige a la página de inicio de sesión
+
+
+@views_blueprint.route('/projects/update_project/<int:id_proyecto>', methods=['GET', 'POST'])
+def update_project(id_proyecto):
+    # Obtiene el proyecto de la base de datos, si no lo encuentra, lanza un error 404
+    proyecto = Proyectos.query.get_or_404(id_proyecto)
+
+    if request.method == 'POST':
+        # Actualiza los datos con la información del formulario
+        proyecto.nombre = request.form['nombre']
+        proyecto.descripcion = request.form['descripcion']
+        proyecto.requisitos = request.form['requisitos']
+        proyecto.fecha_inicio = request.form.get('fecha_inicio')
+        proyecto.fecha_fin = request.form.get('fecha_fin')
+
+        try:
+            db.session.commit()  # Guarda los cambios en la base de datos
+            flash('Proyecto actualizado con éxito', 'success')
+            return redirect(url_for('views.projects'))
+        except Exception as e:
+            db.session.rollback()  # Revertir si hay un error
+            flash(f'Error al actualizar el proyecto: {str(e)}', 'danger')
+
+    return render_template('projects/update_project.html', show_navbar=True, proyecto=proyecto)
+
+@views_blueprint.route('/main/<int:id_proyecto>')
+def main(id_proyecto):
+    if 'user' in session:
+        proyecto = Proyectos.query.get(id_proyecto)
+
+        requisitos = proyecto.requisitos.split(', ')
+
+        usuarios = db.session.query(Usuarios, Equipo.rol_proyecto).\
+        join(Equipo, Usuarios.id_usuario == Equipo.id_usuario).\
+        filter(Equipo.id_proyecto == id_proyecto).all()
+
+
+
+        return render_template('main.html', show_navbar=True, proyecto=proyecto, requisitos=requisitos, usuarios=usuarios)
+    return redirect(url_for('views.login'))
 
 @views_blueprint.route('/logout')
 def logout():
     session.pop('user', None)
     return redirect(url_for('views.login'))
+
+
 
 # Ruta para iniciar el motor de inferencia
 @views_blueprint.route('/iniciar_motor', methods=['GET'])
@@ -183,5 +220,70 @@ def iniciar_motor():
     # Devolvemos las recomendaciones como JSON para el frontend
     return jsonify(recomendaciones)
 
+@views_blueprint.route('/buscar_usuarios')
+def buscar_usuarios():
+    query = request.args.get('query')
+    proyecto_id = request.args.get('proyecto_id')  # Asegúrate de pasar el ID del proyecto
 
+    # Obtén los IDs de los usuarios que ya están en el equipo del proyecto
+    usuarios_en_equipo = db.session.query(Equipo.id_usuario).filter(Equipo.id_proyecto == proyecto_id).all()
+    ids_usuario_en_equipo = {usuario[0] for usuario in usuarios_en_equipo}  # Usamos un set para búsqueda rápida
+
+    # Filtra los usuarios que no están en el equipo
+    usuarios = Usuarios.query.filter(
+        Usuarios.nombre.like(f'%{query}%'),
+        Usuarios.id_usuario.notin_(ids_usuario_en_equipo)
+    ).all()
+
+    return jsonify([{'id_usuario': u.id_usuario, 'nombre': u.nombre} for u in usuarios])
+
+@views_blueprint.route('/agregar_equipo', methods=['POST'])
+def agregar_equipo():
+    data = request.json
+    proyecto_id = data['proyecto_id']
+    users = data['users']
+    
+    for user in users:
+        equipo = Equipo(
+            id_proyecto=proyecto_id,
+            id_usuario=user['id'],
+            rol_proyecto=user['rol'],
+            experiencia=user['experiencia']
+        )
+        db.session.add(equipo)
+    
+    db.session.commit()
+
+    # Obtener la lista actualizada de usuarios
+    usuarios = db.session.query(Usuarios.nombre, Equipo.rol_proyecto).join(Equipo).filter(Equipo.id_proyecto == proyecto_id).all()
+    return jsonify({'message': 'Usuarios agregados al proyecto con éxito.', 'usuarios': [{'nombre': u[0], 'rol': u[1]} for u in usuarios]})
+
+@views_blueprint.route('/eliminar_usuario_proyecto/<int:id_proyecto>/<int:id_usuario>', methods=['DELETE'])
+def eliminar_usuario_proyecto(id_proyecto, id_usuario):
+    equipo = db.session.query(Equipo).filter(Equipo.id_usuario == id_usuario, Equipo.id_proyecto == id_proyecto).first()
+    
+    if equipo:
+        db.session.delete(equipo)
+        db.session.commit()
+        return jsonify({'message': 'Usuario eliminado del proyecto con éxito.'})
+    
+    return jsonify({'message': 'Usuario no encontrado en el proyecto.'}), 404
+
+@views_blueprint.route('/crear_sprints/<int:id_proyecto>', methods=['POST'])
+def crear_sprints(id_proyecto):
+    if 'user' in session:
+
+        print("Usuario en sesión, comenzando proceso para crear sprints...")  # Mensaje de depuración
+
+        proyecto = Proyectos.query.get(id_proyecto)
+        requisitos = proyecto.requisitos
+        requisitos = requisitos.lower()
+
+        print(f"Valor de requisitos: {requisitos}")
+
+        ejecutar_motor_requisitos(id_proyecto, requisitos)
+        print("Ejecución completa del motor de inferencia.") 
+        
+        return redirect(url_for('views.main', id_proyecto=id_proyecto))
+    return redirect(url_for('views.login'))
 

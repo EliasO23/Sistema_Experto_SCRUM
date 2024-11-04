@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Experto - GPSRCM</title>
+    <title>Login</title>
 
-    <script src="{{ url_for('static', filename='../static/Javascript/alertas.js') }}"></script>
 
     <!-- CSS -->
-    <link rel="stylesheet" href="../static/css/login.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}" />
+
 
 </head>
 
@@ -30,10 +30,10 @@
             </div>
 
             <!-- Right section with login form -->
-            <div class="right-section">
+            <div class="right-section bg-ligthblue">
                 <div class="logo">
                     <span>Sistema Experto</span>
-                    <span>SCRUM</span>
+                    <a href="{{ url_for('views.index') }}"><span>SCRUM</span></a>
                 </div>
                 <h2>Bienvenido</h2>
                 <p>Por favor ingresa tus datos.</p>
@@ -41,11 +41,13 @@
                 <!-- Mostrar mensajes flash -->
                 {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
-                        <ul class="flash-messages">
+                        <div class="flash-messages">
                             {% for category, message in messages %}
-                                <li class="{{ category }}">{{ message }}</li>
+                                <div class="alert alert-{{ category }}">
+                                    {{ message }}
+                                </div>
                             {% endfor %}
-                        </ul>
+                        </div>
                     {% endif %}
                 {% endwith %}
 
@@ -72,6 +74,8 @@
 
 
     </main>
+
+    <script src="{{ url_for('static', filename='../static/Javascript/alertas.js') }}"></script>
 
 </body>
 

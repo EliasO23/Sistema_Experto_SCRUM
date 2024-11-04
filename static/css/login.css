@@ -24,10 +24,17 @@ body {
 
 .left-section {
     flex: 1;
-    background-color: #E9EFFF;
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.bg-white{
+    color: white !important;
+}
+
+.bg-ligthblue{
+    background-color: #E9EFFF;
 }
 
 .left-section img {
@@ -40,6 +47,11 @@ body {
     padding: 40px;
 }
 
+.logo a{
+    text-decoration: none;
+    color: black;
+}
+
 .right-section h2 {
     font-size: 24px;
     margin-bottom: 10px;
@@ -49,6 +61,15 @@ body {
     font-size: 14px;
     color: #888;
     margin-bottom: 20px;
+}
+
+.right-section p a {
+    color: #007BFF;
+    text-decoration: none;
+}
+
+.right-section p a:hover {
+    text-decoration: underline;
 }
 
 .form-group {
@@ -142,3 +163,40 @@ body {
 .help a:hover {
     text-decoration: underline;
 }
+
+/* Estilos para las alertas */
+.flash-messages {
+    margin-bottom: 20px;
+}
+
+.alert {
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    color: #fff;
+}
+
+/* Estilo para alerta de error */
+.alert-error {
+    background-color: #f8847c; 
+    border-left: 5px solid #d32f2f;
+}
+
+/* Estilo para alerta de éxito (opcional) */
+.alert-success {
+    background-color: #4CAF50; 
+    border-left: 5px solid #388E3C;
+}
+
+/* Estilo opcional de animación */
+.alert {
+    opacity: 0;
+    animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+

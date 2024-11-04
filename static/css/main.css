@@ -2,51 +2,14 @@
 
 *{
     font-family: 'Roboto Condensed', sans-serif;
+    margin: 0;
+    padding: 0;
 }
 
 body {
     background-color: #f4f5f7;
 }
-.logo{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
 
-.logo h1{
-    font-size: 2rem;
-    font-weight: 800;
-    color: #007bff;
-}
-
-.nav{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-}
-
-.sidebar {
-    background-color: #e9efff;
-    height: auto;
-    padding: 20px;
-}
-.sidebar .nav-link {
-    color: #333;
-}
-.nav-item:hover {
-    background-color: #d1e3ff;
-    border-radius: 5px;
-}
-.top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-.search-bar input {
-    width: 300px;
-}
 .overview {
     border: 2px solid #007bff;
     border-radius: 8px;
@@ -54,6 +17,9 @@ body {
     background-color: white;
     margin: 2rem 0;
 }
+
+
+
 .card-column {
     background-color: #f4f9ff;
     border-radius: 8px;
@@ -77,11 +43,28 @@ body {
     font-size: 1rem;
     height: auto;
     padding: 1rem;
-    border-radius: 10px;
-    border: 1px solid #44515f
+    border-radius: 5px;
 }
 
 
 .form-group section p{
     margin: 0;
+    text-transform: capitalize;
+}
+
+.date{
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+}
+
+select {
+    width: 150px; /* Ajusta el ancho según sea necesario */
+    padding: 10px; /* Espaciado interno */
+    border: 1px solid #ccc
+
+}
+
+.list-Us{
+    margin-top: 1rem;
 }

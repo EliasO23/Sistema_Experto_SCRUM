@@ -1,0 +1,14 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+
+
+<nav class="navbar">
+    <div class="logo">SCRUM</div>
+    <ul class="nav-links">
+        <li><a href="{{url_for('views.projects')}}">Proyectos</a></li>
+        <li><a href="#">Sprints</a></li>
+        <li><a href="#">Tareas</a></li>
+    </ul>
+    <button class="logout-button">
+        <a href="{{url_for('views.logout')}}">Cerrar sesión</a>
+    </button>
+</nav>

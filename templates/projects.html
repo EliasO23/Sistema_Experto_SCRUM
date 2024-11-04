@@ -6,34 +6,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema Experto - GPSRCM</title>
 
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+
     <!-- CSS -->
-    <link rel="stylesheet" href="../static/css/projects.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/projects.css') }}" />
+
 
 </head>
 
 <body>
+
+    {% if show_navbar %}
+        {% include 'navbar.html' %}
+    {% endif %}
+
     <main class="container">
         <!-- Titulo Principal -->
         <h1 class="main-title">Proyectos Disponibles</h1>
 
         <div class="header">
-            <a href="{{ url_for('views.new_project') }}"><button class="create-button">Crear</button></a>
+            <a href="{{ url_for('views.new_project') }}">
+                <button class="create-button">
+                    <i class="fas fa-plus-circle"></i>   Crear
+                </button>
+            </a>
         </div>
 
         <!-- Listado de Proyectos -->
         {% for proyecto in proyectos %}
         <div class="project-list">
             <div class="project-header">
-                <h2>{{ proyecto.nombre }}</h2>
-                <div class="status">{{ proyecto.estado }}</div>
+                <a href="{{url_for('views.main', id_proyecto = proyecto.id_proyecto)}}">
+                    <h2><i class="fas fa-folder"></i> {{ proyecto.nombre }}</h2>
+                </a>
+                
+                <div class="status-{{ proyecto.estado }}">{{ proyecto.estado }}</div>
             </div>
             <div class="project-description">
                 {{ proyecto.descripcion }}
             </div>
             <div class="project-footer">
-                <div class="date">{{ proyecto.fecha_inicio.strftime('%d %B %Y') if proyecto.fecha_inicio else 'Sin fecha
-                    de inicio' }}</div>
-                <button>Modificar</button>
+                <div class="date">
+                    <i class="fas fa-calendar-alt"></i> 
+                    {{ proyecto.fecha_inicio.strftime('%d %B %Y') if proyecto.fecha_inicio else 'Sin fecha
+                    de inicio' }}
+                </div>
+
+                <a href="{{ url_for('views.update_project', id_proyecto = proyecto.id_proyecto) }}">
+                    <button>
+                        <!-- <i class="fas fa-edit"></i> -->
+                        Modificar
+                    </button>
+                </a>
             </div>
         </div>
         {% endfor %}

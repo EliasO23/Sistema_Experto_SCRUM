@@ -4,24 +4,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página de Registro</title>
-    <link rel="stylesheet" href="../static/css/login.css">
+    <title>Registro</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}" />
+
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMmYLJ4T5r5UpOj6STFZ/IzvZD3A7iVZtb5eF4A" crossorigin="anonymous">
+
 </head>
 
 <body>
 
     <div class="container">
         <!-- Sección izquierda con imagen -->
-        <div class="left-section">
-            <img src="https://t4.ftcdn.net/jpg/04/27/36/57/240_F_427365734_euUxn9fvnXNZ42RKeNTT0Lctq6ns0oTU.jpg"
+        <div class="left-section bg-white">
+            <img src="https://img.freepik.com/free-vector/computer-login-concept-illustration_114360-7962.jpg"
                 alt="Ilustración">
         </div>
 
         <!-- Sección derecha con formulario de registro -->
-        <div class="right-section">
+        <div class="right-section bg-ligthblue">
 
-            <h2>Registrarse</h2>
-            <p>¡Bienvenido! Por favor, introduce tus datos.</p>
+            <h2>Registrate</h2>
+            <p>Por favor, introduce tus datos. ¿Ya tienes cuenta? <a href="{{ url_for('views.login') }}">Inicia Sesion</a></p>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -53,10 +60,11 @@
                 </div>
 
                 <div class="btn">
-                    <button type="submit">Login</button>
+                    <button type="submit">Crear cuenta</button>
                 </div>
                 <div class="help">
-                    ¿Necesitas ayuda? <a href="#">Ayuda</a>
+                    <p>¿Necesitas ayuda? <a href="#">Ayuda</a></p> 
+                    
                 </div>
             </form>
         </div>
