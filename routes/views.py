@@ -1,8 +1,9 @@
 from datetime import datetime
 from flask import Blueprint, flash, jsonify, redirect, request, render_template, session, url_for
-from expert_system.motor_inferencia import Proyecto
+from expert_system.motor_inferencia import Proyecto, ejecutar_motor_tareas
 from models.equipo import Equipo
 from models.proyectos import Proyectos
+from models.sprints import Sprints
 from models.usuarios import Usuarios
 from utils.db import db
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -149,16 +150,6 @@ def new_project():
             except Exception as e:
                 db.session.rollback()
                 flash(f'Error al crear el proyecto: {str(e)}', 'error')
-
-            if requisitos:
-                requisitos = requisitos.lower()
-                sistema = GestionProyectos()
-                sistema.reset()
-
-                sistema.declare(Proyecto(requisitos=requisitos))
-                sistema.run()
-            else:
-                print("El campo 'requisitos' está vacío. Por favor ingresa un valor.", "danger")
             
 
         return render_template('projects/new_project.html', show_navbar=True) # Si el método es GET, renderiza la plantilla HTML para crear un nuevo proyecto
@@ -199,9 +190,10 @@ def main(id_proyecto):
         join(Equipo, Usuarios.id_usuario == Equipo.id_usuario).\
         filter(Equipo.id_proyecto == id_proyecto).all()
 
+        sprints = Sprints.query.filter_by(id_proyecto=id_proyecto).all()
 
 
-        return render_template('main.html', show_navbar=True, proyecto=proyecto, requisitos=requisitos, usuarios=usuarios)
+        return render_template('main.html', show_navbar=True, proyecto=proyecto, requisitos=requisitos, usuarios=usuarios, sprints=sprints)
     return redirect(url_for('views.login'))
 
 @views_blueprint.route('/logout')
@@ -211,14 +203,14 @@ def logout():
 
 
 
-# Ruta para iniciar el motor de inferencia
-@views_blueprint.route('/iniciar_motor', methods=['GET'])
-def iniciar_motor():
-    # Ejecutamos el motor de inferencia
-    recomendaciones = inicializar_motor()
+# # Ruta para iniciar el motor de inferencia
+# @views_blueprint.route('/iniciar_motor', methods=['GET'])
+# def iniciar_motor():
+#     # Ejecutamos el motor de inferencia
+#     recomendaciones = inicializar_motor()
     
-    # Devolvemos las recomendaciones como JSON para el frontend
-    return jsonify(recomendaciones)
+#     # Devolvemos las recomendaciones como JSON para el frontend
+#     return jsonify(recomendaciones)
 
 @views_blueprint.route('/buscar_usuarios')
 def buscar_usuarios():
@@ -276,14 +268,26 @@ def crear_sprints(id_proyecto):
         print("Usuario en sesión, comenzando proceso para crear sprints...")  # Mensaje de depuración
 
         proyecto = Proyectos.query.get(id_proyecto)
-        requisitos = proyecto.requisitos
-        requisitos = requisitos.lower()
+        requisitos = proyecto.requisitos.lower()
+        id = proyecto.id_proyecto
 
         print(f"Valor de requisitos: {requisitos}")
 
         ejecutar_motor_requisitos(id_proyecto, requisitos)
         print("Ejecución completa del motor de inferencia.") 
-        
+
+        return redirect(url_for('views.main', id_proyecto=id_proyecto))
+    return redirect(url_for('views.login'))
+
+@views_blueprint.route('/crear_tareas', methods=['POST'])
+def crear_tareas():
+    if 'user' in session:
+        id_proyecto = request.form.get('id_proyecto')
+        id_sprint = request.form.get('id_sprint')
+
+        ejecutar_motor_tareas(id_sprint, id_proyecto)
+
+        flash("Tareas creadas con éxito.")
         return redirect(url_for('views.main', id_proyecto=id_proyecto))
     return redirect(url_for('views.login'))
 

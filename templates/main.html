@@ -7,10 +7,10 @@
     <title>Gestión de Tareas - AProjectO</title>
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    
+
 
 </head>
 
@@ -197,11 +197,11 @@
                     </section>
                 </div>
                 <section class="date col-5">
-                    <div class="btn-group mb-3" role="group" >
+                    <div class="btn-group mb-3" role="group">
                         <button type="button" class="btn btn-primary">Fecha Inicio:</button>
                         <button type="button" class="btn btn-outline-secondary">{{ proyecto.fecha_inicio }}</button>
                     </div>
-                    <div class="btn-group mb-3" role="group" >
+                    <div class="btn-group mb-3" role="group">
                         <button type="button" class="btn btn-primary">Fecha Fin:</button>
                         <button type="button" class="btn btn-outline-secondary">{{ proyecto.fecha_fin }}</button>
                     </div>
@@ -220,13 +220,36 @@
                     </ul>
                 </div>
 
-                <div>
+                
+                <div class="d-flex justify-content-start align-items-end mt-3">
                     <form action="{{ url_for('views.crear_sprints', id_proyecto=proyecto.id_proyecto) }}" method="post">
-                        <button type="submit" class="btn btn-primary">Crear Sprints</button>
+                        <button type="submit" class="btn btn-secondary">Crear Sprints</button>
+                    </form>
+
+                    <!-- Selector de Sprints y botón para crear tareas -->
+                    <form class="sprint" action="{{ url_for('views.crear_tareas') }}" method="post">
+                        <!-- Campo oculto para enviar el id del proyecto -->
+                        <input type="hidden" name="id_proyecto" value="{{ proyecto.id_proyecto }}">
+
+                        <!-- Selector de Sprints -->
+                        <div class="mb-3">
+                            <label for="sprintSelector" class="form-label">Selecciona un Sprint:</label>
+                            <select name="id_sprint" id="sprintSelector" class="form-select" required>
+                                <option value="" disabled selected>Elige un Sprint</option>
+                                {% for sprint in sprints %}
+                                <option value="{{ sprint.id_sprint }}">{{ sprint.nombre }} ({{ sprint.estado }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+
+                        <!-- Botón para crear tareas -->
+                        <button type="submit" class="btn btn-secondary">Crear Tareas</button>
                     </form>
                 </div>
-                
-                
+
+
 
             </div>
             <!-- Selección de Usuarios y Roles para el Proyecto -->
@@ -247,12 +270,6 @@
                 <!-- Botón para Agregar Usuarios al Proyecto -->
                 <button class="btn btn-primary mt-3" onclick="agregarEquipo()">Agregar al Proyecto</button>
             </div>
-        </div>
-
-        <div>
-            <button>
-                Crear Sprints
-            </button>
         </div>
 
         <!-- Columnas de Tareas -->
