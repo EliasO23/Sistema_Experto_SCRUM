@@ -4,6 +4,7 @@ from expert_system.motor_inferencia import Proyecto, ejecutar_motor_tareas
 from models.equipo import Equipo
 from models.proyectos import Proyectos
 from models.sprints import Sprints
+from models.tareas import Tareas
 from models.usuarios import Usuarios
 from utils.db import db
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -109,7 +110,7 @@ def projects():
         proyectos = Proyectos.query.filter_by(id_usuario=user_id).all()  # Filtrar proyectos por el usuario actual
         if not proyectos:
             flash('No hay proyectos disponibles para mostrar.', 'info')  # Mostrar mensaje si no hay proyectos
-        return render_template('projects.html', show_navbar=True, proyectos=proyectos)  # Renderizar la página de proyectos con los proyectos del usuario
+        return render_template('projects.html', show_navbar=True, proyectos=proyectos, has_project=False)  # Renderizar la página de proyectos con los proyectos del usuario
 
     return redirect(url_for('views.login'))
 
@@ -193,7 +194,7 @@ def main(id_proyecto):
         sprints = Sprints.query.filter_by(id_proyecto=id_proyecto).all()
 
 
-        return render_template('main.html', show_navbar=True, proyecto=proyecto, requisitos=requisitos, usuarios=usuarios, sprints=sprints)
+        return render_template('main.html', show_navbar=True, proyecto=proyecto, requisitos=requisitos, usuarios=usuarios, sprints=sprints, has_project=True)
     return redirect(url_for('views.login'))
 
 @views_blueprint.route('/logout')
@@ -261,6 +262,35 @@ def eliminar_usuario_proyecto(id_proyecto, id_usuario):
     
     return jsonify({'message': 'Usuario no encontrado en el proyecto.'}), 404
 
+
+@views_blueprint.route('/sprints/<int:id_proyecto>', methods=['GET'])
+def sprints(id_proyecto):
+    if 'user' in session:
+        proyecto = Proyectos.query.get(id_proyecto)
+        sprints = Sprints.query.filter_by(id_proyecto=id_proyecto).all()  # Asegúrate de que tu modelo Sprints esté correctamente definido
+        return render_template('sprints.html', proyecto=proyecto, sprints=sprints, show_navbar=True, has_project=True)
+    return redirect(url_for('views.login'))  # Redirigir si no está autenticado
+
+
+@views_blueprint.route('/sprints/update/<int:id_sprint>', methods=['POST'])
+def update_sprint(id_sprint):
+    if 'user' in session:
+        sprint = Sprints.query.get(id_sprint)
+        if sprint:
+            # Obtener nuevas fechas del formulario
+            sprint.fecha_inicio = request.form['fecha_inicio']
+            sprint.fecha_fin = request.form['fecha_fin']
+
+            # Guardar cambios en la base de datos
+            db.session.commit()
+            flash('Sprint actualizado correctamente.', 'success')
+        else:
+            flash('Sprint no encontrado.', 'danger')
+    else:
+        flash('Debes iniciar sesión para realizar esta acción.', 'danger')
+    return redirect(url_for('views.sprints', id_proyecto=sprint.id_proyecto))
+
+
 @views_blueprint.route('/crear_sprints/<int:id_proyecto>', methods=['POST'])
 def crear_sprints(id_proyecto):
     if 'user' in session:
@@ -291,3 +321,25 @@ def crear_tareas():
         return redirect(url_for('views.main', id_proyecto=id_proyecto))
     return redirect(url_for('views.login'))
 
+@views_blueprint.route('/proyecto/<int:id_proyecto>/sprint/<int:id_sprint>/tareas', methods=['GET'])
+def get_tareas(id_proyecto, id_sprint):
+    # Asegúrate de que el usuario esté autenticado
+    if 'user' in session:
+        # Filtrar tareas por id_proyecto e id_sprint
+        tareas = Tareas.query.join(Sprints, Tareas.id_sprint == Sprints.id_sprint) \
+                             .filter(Sprints.id_proyecto == id_proyecto, Tareas.id_sprint == id_sprint).all()
+        
+
+        # Convertir las tareas en un formato JSON
+        tareas_data = [
+            {
+                "nombre": tarea.nombre,
+                "estado": tarea.estado,
+                "dificultad": tarea.dificultad,
+            }
+            for tarea in tareas
+        ]
+        
+        return jsonify({"tareas": tareas_data})
+    
+    return jsonify({"error": "No autorizado"}), 401

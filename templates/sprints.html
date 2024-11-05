@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprints - {{ proyecto.nombre }}</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+</head>
+
+<body>
+
+    {% if show_navbar %}
+    {% include 'navbar.html' with context %}
+    {% endif %}
+
+    <div class="container mt-5">
+        <h1>Sprints del Proyecto: {{ proyecto.nombre }}</h1>
+        <h5 class="mb-3">{{ proyecto.descripcion }}</h5>
+
+        <table class="table mt-5">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Estado</th>
+                    <th>Fecha de Inicio</th>
+                    <th>Fecha de Fin</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sprint in sprints %}
+                <tr>
+                    <td>{{ sprint.nombre }}</td>
+                    <td>{{ sprint.estado }}</td>
+                    <td>
+
+                        <form action="{{ url_for('views.update_sprint', id_sprint=sprint.id_sprint) }}" method="POST"
+                            class="form-inline">
+                            <input type="date" id="fecha_inicio_{{ sprint.id_sprint }}" name="fecha_inicio"
+                                class="form-control"
+                                value="{{ sprint.fecha_inicio.strftime('%Y-%m-%d') if sprint.fecha_inicio else '' }}"
+                                required>
+
+                    <td>
+
+                            <input type="date" id="fecha_fin_{{ sprint.id_sprint }}" name="fecha_fin" class="form-control"
+                            value="{{ sprint.fecha_fin.strftime('%Y-%m-%d') if sprint.fecha_fin else '' }}" required>
+
+                    </td>
+
+                    <td>
+                        <button type="submit" class="btn btn-primary">Actualizar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5">No hay sprints creados para este proyecto.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <a href="{{ url_for('views.main', id_proyecto=proyecto.id_proyecto) }}" class="btn btn-secondary">Volver al
+            Proyecto</a>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.6.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>

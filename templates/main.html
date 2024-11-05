@@ -17,169 +17,11 @@
 <body>
 
     {% if show_navbar %}
-    {% include 'navbar.html' %}
+    {% include 'navbar.html' with context %}
     {% endif %}
 
     <!-- Contenido Principal -->
     <main class="col-md-12 ml-sm-auto px-md-4 ">
-
-        <script>
-            // Mostrar resultados de búsqueda
-            function mostrarResultados() {
-                let results = document.getElementById('search-results');
-                results.style.display = 'block'; // Muestra la lista de resultados
-            }
-
-            // Ocultar resultados de búsqueda
-            function ocultarResultados() {
-                let searchInput = document.getElementById('user-search');
-                let results = document.getElementById('search-results');
-
-                // Esperar un breve momento para permitir que se haga clic en un resultado
-                setTimeout(() => {
-                    if (searchInput.value.trim() === '') {
-                        results.style.display = 'none'; // Oculta la lista si no hay texto
-                    }
-                }, 200);
-            }
-
-            // Buscar usuarios en la base de datos
-            function buscarUsuarios() {
-                let query = document.getElementById('user-search').value;
-                let proyectoId = "{{ proyecto.id_proyecto }}"; // Asegúrate de que esto esté disponible
-
-                if (query.length === 0) {
-                    ocultarResultados(); // Oculta resultados si la búsqueda está vacía
-                    return; // Sale de la función
-                }
-
-                fetch(`/buscar_usuarios?query=${query}&proyecto_id=${proyectoId}`)
-                    .then(response => response.json())
-                    .then(users => {
-                        let results = document.getElementById('search-results');
-                        results.innerHTML = ''; // Limpia resultados previos
-                        if (users.length === 0) {
-                            results.style.display = 'none'; // Oculta la lista si no hay usuarios
-                        } else {
-                            results.style.display = 'block'; // Muestra la lista si hay resultados
-                            users.forEach(user => {
-                                let li = document.createElement('li');
-                                li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
-                                li.innerHTML = `
-                                    ${user.nombre} 
-                                    <button class="btn btn-primary btn-sm" onclick="seleccionarUsuario(${user.id_usuario}, '${user.nombre}')">Seleccionar</button>
-                                `;
-                                results.appendChild(li);
-                            });
-                        }
-                    });
-            }
-
-            // Seleccionar un usuario
-            function seleccionarUsuario(id, nombre) {
-                let selectedList = document.getElementById('selected-users');
-                let li = document.createElement('li');
-                li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
-                li.innerHTML = `
-                    ${nombre}
-                    <select class="form-select form-select-sm" name="rol" onchange="actualizarExperiencia(this)">
-                        <option value="product_owner">Product Owner</option>
-                        <option value="developer">Developer</option>
-                        <option value="admin">Admin</option>
-                        <option value="scrum_master">Scrum Master</option>
-                    </select>
-                    <select class="form-select form-select-sm" name="experiencia" style="display: none;">
-                        <option value="junior">Junior</option>
-                        <option value="intermedio">Intermedio</option>
-                        <option value="senior">Senior</option>
-                    </select>
-                    <button class="btn btn-danger btn-sm" onclick="eliminarUsuario(this)">Quitar</button>
-                `;
-                li.dataset.id = id;
-                selectedList.appendChild(li);
-            }
-
-            // Actualizar la visibilidad del select de experiencia
-            function actualizarExperiencia(selectElement) {
-                let selectedItem = selectElement.parentElement;
-                let experienciaSelect = selectedItem.querySelector('select[name="experiencia"]');
-
-                // Muestra o esconde el select de experiencia según el rol seleccionado
-                if (selectElement.value === "admin" || selectElement.value === "scrum_master" || selectElement.value === "product_owner") {
-                    experienciaSelect.style.display = 'none'; // Oculta el select de experiencia
-                } else {
-                    experienciaSelect.style.display = 'block'; // Muestra el select de experiencia
-                }
-            }
-
-            // Eliminar un usuario de la lista
-            function eliminarUsuario(element) {
-                element.parentElement.remove();
-            }
-
-            // Agregar usuarios al equipo
-            function agregarEquipo() {
-                let users = [];
-                document.querySelectorAll('#selected-users li').forEach(li => {
-                    let id = li.dataset.id;
-                    let rol = li.querySelector('select[name="rol"]').value;
-                    let experiencia = li.querySelector('select[name="experiencia"]').style.display === 'none'
-                        ? null // No asignar experiencia si no es visible
-                        : li.querySelector('select[name="experiencia"]').value;
-                    users.push({ id, rol, experiencia });
-                });
-
-                fetch('/agregar_equipo', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        proyecto_id: "{{ proyecto.id_proyecto }}",
-                        users
-                    })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        alert(data.message);
-                        // Vaciar la lista de usuarios seleccionados después de agregar
-                        document.getElementById('selected-users').innerHTML = '';
-                        document.getElementById('user-search').value = ''; // Limpiar el campo de búsqueda
-                        // Actualizar la lista de usuarios en el proyecto
-                        actualizarListaUsuarios(data.usuarios);
-                    })
-                    .catch(error => console.error('Error:', error));
-            }
-
-            // Función para actualizar la lista de usuarios
-            function actualizarListaUsuarios(usuarios) {
-                let usuariosLista = document.getElementById('usuarios-lista');
-                usuariosLista.innerHTML = ''; // Limpiar la lista actual
-
-                usuarios.forEach(usuario => {
-                    let li = document.createElement('li');
-                    li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
-                    li.innerHTML = `
-                        ${usuario.nombre} - ${usuario.rol}
-                        <button class="btn btn-danger btn-sm" onclick="eliminarUsuarioDelProyecto('${usuario.id_proyecto}', '${usuario.id_usuario}')">Quitar</button>
-                    `;
-                    usuariosLista.appendChild(li);
-                });
-            }
-
-            function eliminarUsuarioDelProyecto(idProyecto, idUsuario) {
-                fetch(`/eliminar_usuario_proyecto/${idProyecto}/${idUsuario}`, {
-                    method: 'DELETE'
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        alert(data.message);
-                        // Recargar la página para reflejar los cambios
-                        location.reload();
-                    })
-                    .catch(error => console.error('Error:', error));
-            }
-
-
-        </script>
 
         <!-- Sección Vista General -->
         <div class="overview row">
@@ -220,7 +62,7 @@
                     </ul>
                 </div>
 
-                
+
                 <div class="d-flex justify-content-start align-items-end mt-3">
                     <form action="{{ url_for('views.crear_sprints', id_proyecto=proyecto.id_proyecto) }}" method="post">
                         <button type="submit" class="btn btn-secondary">Crear Sprints</button>
@@ -242,7 +84,6 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        
 
                         <!-- Botón para crear tareas -->
                         <button type="submit" class="btn btn-secondary">Crear Tareas</button>
@@ -272,37 +113,278 @@
             </div>
         </div>
 
-        <!-- Columnas de Tareas -->
-        <div class="row">
-            <!-- Columna: En espera -->
-            <div class="col-md-4">
-                <div class="card-column">
-                    <h5 class="card-title">En espera</h5>
-                    <div class="add-card">+</div>
-                </div>
-            </div>
+        <div class="mt-5">
+            <h1>Tareas del Proyecto</h1>
 
-            <!-- Columna: En progreso -->
-            <div class="col-md-4">
-                <div class="card-column">
-                    <h5 class="card-title">En progreso</h5>
-                    <div class="add-card">+</div>
-                </div>
+            <!-- Selector de Sprint -->
+            <div class="form-group">
+                <label for="sprintSelect">Selecciona un Sprint:</label>
+                <select id="sprintSelect" class="form-control">
+                    <option value="">Seleccionar Sprint</option>
+                    {% for sprint in sprints %}
+                    <option value="{{ sprint.id_sprint }}">{{ sprint.nombre }}</option>
+                    {% endfor %}
+                </select>
             </div>
+            <button id="loadTasksButton" class="btn btn-primary" type="button">Cargar Tareas</button>
 
-            <!-- Columna: Completado -->
-            <div class="col-md-4">
-                <div class="card-column">
-                    <h5 class="card-title">Completado</h5>
-                    <div class="add-card">+</div>
+            <!-- Contenedor para mostrar las tareas -->
+            <!-- <div id="tasksContainer" class="mt-4"></div> -->
+
+            <!-- Columnas de Tareas -->
+            <div class="row mt-4">
+                <!-- Columna: En espera -->
+                <div class="col-md-4">
+                    <div class="card-column">
+                        <h5 class="card-title">En espera</h5>
+                        <div class="add-card">+</div>
+                        <div id="tasksPending" class="task-cards"></div>
+                    </div>
+                </div>
+
+                <!-- Columna: En progreso -->
+                <div class="col-md-4">
+                    <div class="card-column">
+                        <h5 class="card-title">En progreso</h5>
+                        <div class="add-card">+</div>
+                        <div id="tasksInProgress" class="task-cards"></div>
+                    </div>
+                </div>
+
+                <!-- Columna: Completado -->
+                <div class="col-md-4">
+                    <div class="card-column">
+                        <h5 class="card-title">Completado</h5>
+                        <div class="add-card">+</div>
+                        <div id="tasksCompleted" class="task-cards"></div>
+                    </div>
                 </div>
             </div>
         </div>
+
     </main>
 
 
     <!-- Bootstrap JS and dependencies -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
+    <script>
+        // Mostrar resultados de búsqueda
+        function mostrarResultados() {
+            let results = document.getElementById('search-results');
+            results.style.display = 'block'; // Muestra la lista de resultados
+        }
+
+        // Ocultar resultados de búsqueda
+        function ocultarResultados() {
+            let searchInput = document.getElementById('user-search');
+            let results = document.getElementById('search-results');
+
+            // Esperar un breve momento para permitir que se haga clic en un resultado
+            setTimeout(() => {
+                if (searchInput.value.trim() === '') {
+                    results.style.display = 'none'; // Oculta la lista si no hay texto
+                }
+            }, 200);
+        }
+
+        // Buscar usuarios en la base de datos
+        function buscarUsuarios() {
+            let query = document.getElementById('user-search').value;
+            let proyectoId = "{{ proyecto.id_proyecto }}"; // Asegúrate de que esto esté disponible
+
+            if (query.length === 0) {
+                ocultarResultados(); // Oculta resultados si la búsqueda está vacía
+                return; // Sale de la función
+            }
+
+            fetch(`/buscar_usuarios?query=${query}&proyecto_id=${proyectoId}`)
+                .then(response => response.json())
+                .then(users => {
+                    let results = document.getElementById('search-results');
+                    results.innerHTML = ''; // Limpia resultados previos
+                    if (users.length === 0) {
+                        results.style.display = 'none'; // Oculta la lista si no hay usuarios
+                    } else {
+                        results.style.display = 'block'; // Muestra la lista si hay resultados
+                        users.forEach(user => {
+                            let li = document.createElement('li');
+                            li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+                            li.innerHTML = `
+                                ${user.nombre} 
+                                <button class="btn btn-primary btn-sm" onclick="seleccionarUsuario(${user.id_usuario}, '${user.nombre}')">Seleccionar</button>
+                            `;
+                            results.appendChild(li);
+                        });
+                    }
+                });
+        }
+
+        // Seleccionar un usuario
+        function seleccionarUsuario(id, nombre) {
+            let selectedList = document.getElementById('selected-users');
+            let li = document.createElement('li');
+            li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+            li.innerHTML = `
+                ${nombre}
+                <select class="form-select form-select-sm" name="rol" onchange="actualizarExperiencia(this)">
+                    <option value="product_owner">Product Owner</option>
+                    <option value="developer">Developer</option>
+                    <option value="admin">Admin</option>
+                    <option value="scrum_master">Scrum Master</option>
+                </select>
+                <select class="form-select form-select-sm" name="experiencia" style="display: none;">
+                    <option value="junior">Junior</option>
+                    <option value="intermedio">Intermedio</option>
+                    <option value="senior">Senior</option>
+                </select>
+                <button class="btn btn-danger btn-sm" onclick="eliminarUsuario(this)">Quitar</button>
+            `;
+            li.dataset.id = id;
+            selectedList.appendChild(li);
+        }
+
+        // Actualizar la visibilidad del select de experiencia
+        function actualizarExperiencia(selectElement) {
+            let selectedItem = selectElement.parentElement;
+            let experienciaSelect = selectedItem.querySelector('select[name="experiencia"]');
+
+            // Muestra o esconde el select de experiencia según el rol seleccionado
+            if (selectElement.value === "admin" || selectElement.value === "scrum_master" || selectElement.value === "product_owner") {
+                experienciaSelect.style.display = 'none'; // Oculta el select de experiencia
+            } else {
+                experienciaSelect.style.display = 'block'; // Muestra el select de experiencia
+            }
+        }
+
+        // Eliminar un usuario de la lista
+        function eliminarUsuario(element) {
+            element.parentElement.remove();
+        }
+
+        // Agregar usuarios al equipo
+        function agregarEquipo() {
+            let users = [];
+            document.querySelectorAll('#selected-users li').forEach(li => {
+                let id = li.dataset.id;
+                let rol = li.querySelector('select[name="rol"]').value;
+                let experiencia = li.querySelector('select[name="experiencia"]').style.display === 'none'
+                    ? null // No asignar experiencia si no es visible
+                    : li.querySelector('select[name="experiencia"]').value;
+                users.push({ id, rol, experiencia });
+            });
+
+            fetch('/agregar_equipo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    proyecto_id: "{{ proyecto.id_proyecto }}",
+                    users
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    // Vaciar la lista de usuarios seleccionados después de agregar
+                    document.getElementById('selected-users').innerHTML = '';
+                    document.getElementById('user-search').value = ''; // Limpiar el campo de búsqueda
+                    // Actualizar la lista de usuarios en el proyecto
+                    actualizarListaUsuarios(data.usuarios);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Función para actualizar la lista de usuarios
+        function actualizarListaUsuarios(usuarios) {
+            let usuariosLista = document.getElementById('usuarios-lista');
+            usuariosLista.innerHTML = ''; // Limpiar la lista actual
+
+            usuarios.forEach(usuario => {
+                let li = document.createElement('li');
+                li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+                li.innerHTML = `
+                    ${usuario.nombre} - ${usuario.rol}
+                    <button class="btn btn-danger btn-sm" onclick="eliminarUsuarioDelProyecto('${usuario.id_proyecto}', '${usuario.id_usuario}')">Quitar</button>
+                `;
+                usuariosLista.appendChild(li);
+            });
+        }
+
+        function eliminarUsuarioDelProyecto(idProyecto, idUsuario) {
+            fetch(`/eliminar_usuario_proyecto/${idProyecto}/${idUsuario}`, {
+                method: 'DELETE'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    // Recargar la página para reflejar los cambios
+                    location.reload();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        document.getElementById("loadTasksButton").addEventListener("click", function () {
+            // Obtener el valor del selector de Sprint
+            const sprintId = document.getElementById("sprintSelect").value;
+
+            if (!sprintId) {
+                alert("Por favor selecciona un Sprint.");
+                return;
+            }
+
+            // Realizar la solicitud GET para obtener las tareas
+            fetch(`/proyecto/{{ proyecto.id_proyecto }}/sprint/${sprintId}/tareas`)
+                .then(response => response.json())
+                .then(data => {
+                    // Limpiar las columnas de tareas previas
+                    document.getElementById("tasksPending").innerHTML = "";
+                    document.getElementById("tasksInProgress").innerHTML = "";
+                    document.getElementById("tasksCompleted").innerHTML = "";
+
+                    if (data.tareas.length > 0) {
+                        const columnContainers = {
+                            pendiente: document.getElementById("tasksPending"),
+                            en_proceso: document.getElementById("tasksInProgress"),
+                            completada: document.getElementById("tasksCompleted")
+                        };
+
+                        // Iterar sobre cada tarea y agregarla a la columna correspondiente
+                        let firstTaskInColumn = { pendiente: true, en_proceso: true, completada: true };
+
+                        data.tareas.forEach(tarea => {
+                            const taskCard = document.createElement("div");
+                            taskCard.classList.add("card", "mb-2", "task-card");
+
+                            // Añadir la clase 'first-card' solo a la primera tarjeta en cada columna
+                            if (firstTaskInColumn[tarea.estado]) {
+                                taskCard.classList.add("first-card");
+                                firstTaskInColumn[tarea.estado] = false;
+                            }
+
+                            taskCard.innerHTML = `
+                        <div class="card-body">
+                            <h6 class="card-title">${tarea.nombre}</h6>
+                            <p class="card-text">Estado: ${tarea.estado}</p>
+                        </div>
+                    `;
+
+                            // Clasificar la tarea según su estado y agregarla a la columna correcta
+                            columnContainers[tarea.estado]?.appendChild(taskCard);
+                        });
+                    } else {
+                        document.getElementById("tasksPending").innerHTML = "<p>No hay tareas en espera.</p>";
+                        document.getElementById("tasksInProgress").innerHTML = "<p>No hay tareas en progreso.</p>";
+                        document.getElementById("tasksCompleted").innerHTML = "<p>No hay tareas completadas.</p>";
+                    }
+                })
+                .catch(error => {
+                    console.error("Error al cargar las tareas:", error);
+                });
+        });
+
+
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.6.0/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
