@@ -1,6 +1,7 @@
 from datetime import datetime
 from flask import Blueprint, flash, jsonify, redirect, request, render_template, session, url_for
-from expert_system.motor_inferencia import Proyecto, ejecutar_motor_tareas
+from expert_system.motor_inferencia import Proyecto, ejecutar_motor_asignaciones, ejecutar_motor_tareas
+from models.asignacion import Asignacion
 from models.equipo import Equipo
 from models.proyectos import Proyectos
 from models.sprints import Sprints
@@ -325,10 +326,13 @@ def crear_tareas():
 def get_tareas(id_proyecto, id_sprint):
     # Asegúrate de que el usuario esté autenticado
     if 'user' in session:
-        # Filtrar tareas por id_proyecto e id_sprint
+        # Filtrar tareas por id_proyecto e id_sprint, y obtener el nombre del usuario asignado si existe
         tareas = Tareas.query.join(Sprints, Tareas.id_sprint == Sprints.id_sprint) \
-                             .filter(Sprints.id_proyecto == id_proyecto, Tareas.id_sprint == id_sprint).all()
-        
+                             .outerjoin(Asignacion, Tareas.id_tarea == Asignacion.id_tarea) \
+                             .outerjoin(Usuarios, Asignacion.id_usuario == Usuarios.id_usuario) \
+                             .filter(Sprints.id_proyecto == id_proyecto, Tareas.id_sprint == id_sprint) \
+                             .add_columns(Tareas.nombre, Tareas.estado, Tareas.dificultad, Usuarios.nombre.label("usuario_nombre")) \
+                             .all()
 
         # Convertir las tareas en un formato JSON
         tareas_data = [
@@ -336,6 +340,7 @@ def get_tareas(id_proyecto, id_sprint):
                 "nombre": tarea.nombre,
                 "estado": tarea.estado,
                 "dificultad": tarea.dificultad,
+                "usuario_nombre": tarea.usuario_nombre or "No asignado"
             }
             for tarea in tareas
         ]
@@ -343,3 +348,28 @@ def get_tareas(id_proyecto, id_sprint):
         return jsonify({"tareas": tareas_data})
     
     return jsonify({"error": "No autorizado"}), 401
+
+@views_blueprint.route('/asignar_tareas', methods=['POST'])
+def asignar_tareas():
+    id_proyecto = request.form['id_proyecto']
+    id_sprint = request.form['id_sprint']
+    
+    # Obtener las tareas del sprint seleccionado
+    tareas = Tareas.query.filter_by(id_sprint=id_sprint, estado='pendiente').all()
+
+    for tarea in tareas:
+        print(f"Tarea ID: {tarea.id_tarea}, Nombre: {tarea.nombre}, Estado: {tarea.dificultad}")
+    
+    # Obtener los usuarios del equipo que pertenecen al proyecto y tienen rol de 'developer'
+    usuarios = db.session.query(Usuarios.id_usuario, Equipo.experiencia, Equipo.rol_proyecto).\
+        join(Equipo, Usuarios.id_usuario == Equipo.id_usuario).\
+        filter(Equipo.id_proyecto == id_proyecto, Equipo.rol_proyecto == 'developer').all()
+    
+    for usuario in usuarios:
+        print(f"Usuario ID: {usuario.id_usuario}, Experiencia: {usuario.experiencia}, Rol: {usuario.rol_proyecto}")
+    
+    ejecutar_motor_asignaciones(tareas, usuarios)
+
+    print('motor')
+    
+    return redirect(url_for('views.main', id_proyecto=id_proyecto))

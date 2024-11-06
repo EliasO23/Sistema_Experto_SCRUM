@@ -1,4 +1,5 @@
 from experta import *
+from models.asignacion import Asignacion
 from models.tareas import Tareas
 from models.tareas_bc import TareasBC
 from models.tareas_sprint import TareasSprint
@@ -16,6 +17,15 @@ class Sprint(Fact):
 class Proyecto(Fact):
     id_proyecto = Field(int, mandatory=True)
     requisitos = Field(str, mandatory=True)
+
+class Tarea(Fact):
+    id_tarea = Field(int, mandatory=True)
+    dificultad = Field(str, mandatory=True)
+
+class Usuario(Fact):
+    id_usuario = Field(int, mandatory=True)
+    experiencia = Field(str, mandatory=True)  # Puede ser 'junior', 'intermedio' o 'senior'
+    rol = Field(str, mandatory=True)
 
 # Definición del sistema experto con las reglas
 class GestionProyectos(KnowledgeEngine):
@@ -135,7 +145,31 @@ class GestionProyectos(KnowledgeEngine):
         agregar_sprints(resultados, id_proyecto)
         print("Sprint de 'final' agregado correctamente.")
 
+    # Reglas para asignación según dificultad
+    @Rule(Tarea(id_tarea=MATCH.id_tarea, dificultad='3'), Usuario(id_usuario=MATCH.id_usuario, rol='developer', experiencia='senior'))
+    def asignar_tarea_dificultad_alta(self, id_tarea, id_usuario):
+        asignar_tareas(id_tarea, id_usuario)
+        print("Asignación de tarea de dificultad alta a usuario senior")
+        
+    @Rule(Tarea(id_tarea=MATCH.id_tarea, dificultad='2'), Usuario(id_usuario=MATCH.id_usuario, rol='developer', experiencia='intermedio'))
+    def asignar_tarea_dificultad_media(self, id_tarea, id_usuario):
+        asignar_tareas(id_tarea, id_usuario)
+        print("Asignación de tarea de dificultad media a usuario intermedio")
 
+
+    @Rule(Tarea(id_tarea=MATCH.id_tarea, dificultad='1'), Usuario(id_usuario=MATCH.id_usuario, rol='developer', experiencia='junior'))
+    def asignar_tarea_dificultad_baja(self, id_tarea, id_usuario):
+        asignar_tareas(id_tarea, id_usuario)
+        print("Asignación de tarea de dificultad baja a usuario junior")
+   
+    # Inicializa los hechos y configura el estado inicial del sistema
+    def configurar_facts(self, tareas, usuarios):
+        for tarea in tareas:
+            self.declare(Tarea(id_tarea=tarea.id_tarea, dificultad=tarea.dificultad))
+            print("hola")
+        for usuario in usuarios:
+            self.declare(Usuario(id_usuario=usuario.id_usuario, experiencia=usuario.experiencia, rol=usuario.rol_proyecto, disponible=True))       
+            
 # Funciones
 def ejecutar_motor_requisitos(id_proyecto, requisitos):
     sistema = GestionProyectos()
@@ -149,6 +183,24 @@ def ejecutar_motor_tareas(id_sprint, id_proyecto):
     sistema.reset()
     sistema.declare(Sprint(id_sprint=int(id_sprint), id_proyecto=int(id_proyecto)))
     sistema.run()
+
+def ejecutar_motor_asignaciones(tareas, usuarios):
+    sistema = GestionProyectos()  
+    sistema.reset()  
+    
+    # Declarar los hechos de las tareas
+    for tarea in tareas:
+        sistema.declare(Tarea(id_tarea=int(tarea.id_tarea), dificultad=str(tarea.dificultad)))
+        # print(f"{tarea.nombre} {tarea.dificultad}")
+    
+    # Declarar los hechos de los usuarios
+    for usuario in usuarios:
+        sistema.declare(Usuario(id_usuario=int(usuario.id_usuario), experiencia=usuario.experiencia, rol=usuario.rol_proyecto))
+        # print(f"{usuario.id_usuario} {usuario.experiencia} {usuario.rol_proyecto}")
+
+    # Ejecutar el motor para procesar las reglas
+    sistema.run()
+
 
 
 def buscar_por_palabra_clave(palabra_clave):
@@ -183,4 +235,9 @@ def agregar_sprints(resultados, id_proyecto):
             print("Sprints creados con éxito y almacenados en la base de datos.")
         else:
             print("No se encontraron resultados en la base de datos")
-          
+
+def asignar_tareas(id_tarea, id_usuario):
+    nueva_asignacion = Asignacion(id_tarea=id_tarea, id_usuario=id_usuario)
+    db.session.add(nueva_asignacion)
+    db.session.commit()
+    print(f"Asignación guardada: Tarea {id_tarea} -> Usuario {id_usuario}")

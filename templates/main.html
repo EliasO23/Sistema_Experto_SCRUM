@@ -116,20 +116,40 @@
         <div class="mt-5">
             <h1>Tareas del Proyecto</h1>
 
-            <!-- Selector de Sprint -->
-            <div class="form-group">
-                <label for="sprintSelect">Selecciona un Sprint:</label>
-                <select id="sprintSelect" class="form-control">
-                    <option value="">Seleccionar Sprint</option>
-                    {% for sprint in sprints %}
-                    <option value="{{ sprint.id_sprint }}">{{ sprint.nombre }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <button id="loadTasksButton" class="btn btn-primary" type="button">Cargar Tareas</button>
+            <!-- Fila para las listas desplegables y botones -->
+            <div class="row mb-3">
+                <!-- Selector de Sprint -->
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="sprintSelect">Selecciona un Sprint:</label>
+                        <select id="sprintSelect" class="form-control">
+                            <option value="">Seleccionar Sprint</option>
+                            {% for sprint in sprints %}
+                            <option value="{{ sprint.id_sprint }}">{{ sprint.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button id="loadTasksButton" class="btn btn-primary" type="button">Cargar Tareas</button>
+                </div>
 
-            <!-- Contenedor para mostrar las tareas -->
-            <!-- <div id="tasksContainer" class="mt-4"></div> -->
+                <!-- Segundo selector de Sprint y botón -->
+                <div class="col-md-4">
+                    <form action="{{ url_for('views.asignar_tareas') }}" method="post">
+                        <input type="hidden" name="id_proyecto" value="{{ proyecto.id_proyecto }}">
+                        <div class="form-group">
+                            <label for="sprintSelector">Selecciona un Sprint:</label>
+                            <select name="id_sprint" id="sprintSelector" class="form-control" required>
+                                <option value="" disabled selected>Elige un Sprint</option>
+                                {% for sprint in sprints %}
+                                <option value="{{ sprint.id_sprint }}">{{ sprint.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Asignar Tareas</button>
+                    </form>
+                </div>
+            </div>
+
 
             <!-- Columnas de Tareas -->
             <div class="row mt-4">
@@ -211,9 +231,9 @@
                             let li = document.createElement('li');
                             li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
                             li.innerHTML = `
-                                ${user.nombre} 
-                                <button class="btn btn-primary btn-sm" onclick="seleccionarUsuario(${user.id_usuario}, '${user.nombre}')">Seleccionar</button>
-                            `;
+                        ${user.nombre} 
+                        <button class="btn btn-primary btn-sm" onclick="seleccionarUsuario(${user.id_usuario}, '${user.nombre}')">Seleccionar</button>
+                    `;
                             results.appendChild(li);
                         });
                     }
@@ -226,20 +246,20 @@
             let li = document.createElement('li');
             li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
             li.innerHTML = `
-                ${nombre}
-                <select class="form-select form-select-sm" name="rol" onchange="actualizarExperiencia(this)">
-                    <option value="product_owner">Product Owner</option>
-                    <option value="developer">Developer</option>
-                    <option value="admin">Admin</option>
-                    <option value="scrum_master">Scrum Master</option>
-                </select>
-                <select class="form-select form-select-sm" name="experiencia" style="display: none;">
-                    <option value="junior">Junior</option>
-                    <option value="intermedio">Intermedio</option>
-                    <option value="senior">Senior</option>
-                </select>
-                <button class="btn btn-danger btn-sm" onclick="eliminarUsuario(this)">Quitar</button>
-            `;
+        ${nombre}
+        <select class="form-select form-select-sm" name="rol" onchange="actualizarExperiencia(this)">
+            <option value="product_owner">Product Owner</option>
+            <option value="developer">Developer</option>
+            <option value="admin">Admin</option>
+            <option value="scrum_master">Scrum Master</option>
+        </select>
+        <select class="form-select form-select-sm" name="experiencia" style="display: none;">
+            <option value="junior">Junior</option>
+            <option value="intermedio">Intermedio</option>
+            <option value="senior">Senior</option>
+        </select>
+        <button class="btn btn-danger btn-sm" onclick="eliminarUsuario(this)">Quitar</button>
+    `;
             li.dataset.id = id;
             selectedList.appendChild(li);
         }
@@ -300,12 +320,12 @@
             usuariosLista.innerHTML = ''; // Limpiar la lista actual
 
             usuarios.forEach(usuario => {
-                let li = document.createElement('li');
-                li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
-                li.innerHTML = `
-                    ${usuario.nombre} - ${usuario.rol}
-                    <button class="btn btn-danger btn-sm" onclick="eliminarUsuarioDelProyecto('${usuario.id_proyecto}', '${usuario.id_usuario}')">Quitar</button>
-                `;
+                    let li = document.createElement('li');
+                    li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+                    li.innerHTML = `
+                ${usuario.nombre} - ${usuario.rol}
+                <button class="btn btn-danger btn-sm" onclick="eliminarUsuarioDelProyecto('${usuario.id_proyecto}', '${usuario.id_usuario}')">Quitar</button>
+            `;
                 usuariosLista.appendChild(li);
             });
         }
@@ -323,20 +343,35 @@
                 .catch(error => console.error('Error:', error));
         }
 
-        document.getElementById("loadTasksButton").addEventListener("click", function () {
-            // Obtener el valor del selector de Sprint
-            const sprintId = document.getElementById("sprintSelect").value;
-
-            if (!sprintId) {
-                alert("Por favor selecciona un Sprint.");
-                return;
+        document.addEventListener("DOMContentLoaded", function () {
+            // Cargar tareas del sprint seleccionado en localStorage al cargar la página
+            const storedSprintId = localStorage.getItem("selectedSprintId");
+            if (storedSprintId) {
+                document.getElementById("sprintSelect").value = storedSprintId;
+                loadTasks(storedSprintId);
             }
 
-            // Realizar la solicitud GET para obtener las tareas
+            document.getElementById("loadTasksButton").addEventListener("click", function () {
+                const sprintId = document.getElementById("sprintSelect").value;
+
+                if (!sprintId) {
+                    alert("Por favor selecciona un Sprint.");
+                    return;
+                }
+
+                // Guardar el ID del sprint seleccionado en localStorage
+                localStorage.setItem("selectedSprintId", sprintId);
+
+                // Cargar las tareas del sprint seleccionado
+                loadTasks(sprintId);
+            });
+        });
+
+        function loadTasks(sprintId) {
             fetch(`/proyecto/{{ proyecto.id_proyecto }}/sprint/${sprintId}/tareas`)
                 .then(response => response.json())
                 .then(data => {
-                    // Limpiar las columnas de tareas previas
+                    // Limpiar las columnas de tareas antes de cargarlas
                     document.getElementById("tasksPending").innerHTML = "";
                     document.getElementById("tasksInProgress").innerHTML = "";
                     document.getElementById("tasksCompleted").innerHTML = "";
@@ -348,27 +383,26 @@
                             completada: document.getElementById("tasksCompleted")
                         };
 
-                        // Iterar sobre cada tarea y agregarla a la columna correspondiente
                         let firstTaskInColumn = { pendiente: true, en_proceso: true, completada: true };
 
                         data.tareas.forEach(tarea => {
                             const taskCard = document.createElement("div");
                             taskCard.classList.add("card", "mb-2", "task-card");
 
-                            // Añadir la clase 'first-card' solo a la primera tarjeta en cada columna
                             if (firstTaskInColumn[tarea.estado]) {
                                 taskCard.classList.add("first-card");
                                 firstTaskInColumn[tarea.estado] = false;
                             }
 
+                            // Agregar el nombre del usuario asignado o "No asignado"
                             taskCard.innerHTML = `
-                        <div class="card-body">
-                            <h6 class="card-title">${tarea.nombre}</h6>
-                            <p class="card-text">Estado: ${tarea.estado}</p>
-                        </div>
-                    `;
+                            <div class="card-body">
+                                <h6 class="card-title">${tarea.nombre}</h6>
+                                <p class="card-text">Estado: ${tarea.estado}</p>
+                                <p class="card-text">Asignado a: ${tarea.usuario_nombre || "No asignado"}</p>
+                            </div>
+                        `;
 
-                            // Clasificar la tarea según su estado y agregarla a la columna correcta
                             columnContainers[tarea.estado]?.appendChild(taskCard);
                         });
                     } else {
@@ -380,7 +414,7 @@
                 .catch(error => {
                     console.error("Error al cargar las tareas:", error);
                 });
-        });
+        }
 
 
     </script>
