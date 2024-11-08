@@ -133,6 +133,114 @@ class GestionProyectos(KnowledgeEngine):
 
         print("Sprints agregados correctamente...")
 
+    @Rule(Proyecto(requisitos=MATCH.requisitos & CONTAINS('habitos'), id_proyecto=MATCH.id_proyecto))
+    def generar_sprint_habitos(self, requisitos, id_proyecto):
+        print("Iniciando búsqueda en la base de datos...")
+
+        # Buscar los sprints en sprints_bc 
+        resultados = buscar_por_palabra_clave('habitos')
+
+        # Agregar los resultados a Sprints
+        agregar_sprints(resultados, id_proyecto)
+
+        print("Sprints agregados correctamente...")
+
+    @Rule(Proyecto(requisitos=MATCH.requisitos & CONTAINS('progreso'), id_proyecto=MATCH.id_proyecto))
+    def generar_sprint_progreso(self, requisitos, id_proyecto):
+        print("Iniciando búsqueda en la base de datos...")
+
+        # Buscar los sprints en sprints_bc 
+        resultados = buscar_por_palabra_clave('progreso')
+
+        # Agregar los resultados a Sprints
+        agregar_sprints(resultados, id_proyecto)
+
+        print("Sprints agregados correctamente...")
+    
+    @Rule(Proyecto(requisitos=MATCH.requisitos & CONTAINS('recordatorios'), id_proyecto=MATCH.id_proyecto))
+    def generar_sprint_recordatorios(self, requisitos, id_proyecto):
+        print("Iniciando búsqueda en la base de datos...")
+
+        # Buscar los sprints en sprints_bc 
+        resultados = buscar_por_palabra_clave('recordatorios')
+
+        # Agregar los resultados a Sprints
+        agregar_sprints(resultados, id_proyecto)
+
+        print("Sprints agregados correctamente...")
+    
+    @Rule(Proyecto(requisitos=MATCH.requisitos & CONTAINS('citas'), id_proyecto=MATCH.id_proyecto))
+    def generar_sprint_citas(self, requisitos, id_proyecto):
+        print("Iniciando búsqueda en la base de datos...")
+
+        # Buscar los sprints en sprints_bc 
+        resultados = buscar_por_palabra_clave('citas')
+
+        # Agregar los resultados a Sprints
+        agregar_sprints(resultados, id_proyecto)
+
+        print("Sprints agregados correctamente...")
+    
+    @Rule(Proyecto(requisitos=MATCH.requisitos & CONTAINS('video'), id_proyecto=MATCH.id_proyecto))
+    def generar_sprint_video(self, requisitos, id_proyecto):
+        print("Iniciando búsqueda en la base de datos...")
+
+        # Buscar los sprints en sprints_bc 
+        resultados = buscar_por_palabra_clave('video')
+
+        # Agregar los resultados a Sprints
+        agregar_sprints(resultados, id_proyecto)
+
+        print("Sprints agregados correctamente...")
+
+    @Rule(Proyecto(requisitos=MATCH.requisitos & CONTAINS('facturacion'), id_proyecto=MATCH.id_proyecto))
+    def generar_sprint_facturacion(self, requisitos, id_proyecto):
+        print("Iniciando búsqueda en la base de datos...")
+
+        # Buscar los sprints en sprints_bc 
+        resultados = buscar_por_palabra_clave('facturacion')
+
+        # Agregar los resultados a Sprints
+        agregar_sprints(resultados, id_proyecto)
+
+        print("Sprints agregados correctamente...")
+
+    @Rule(Proyecto(requisitos=MATCH.requisitos & CONTAINS('reservas'), id_proyecto=MATCH.id_proyecto))
+    def generar_sprint_reservas(self, requisitos, id_proyecto):
+        print("Iniciando búsqueda en la base de datos...")
+
+        # Buscar los sprints en sprints_bc 
+        resultados = buscar_por_palabra_clave('reservas')
+
+        # Agregar los resultados a Sprints
+        agregar_sprints(resultados, id_proyecto)
+
+        print("Sprints agregados correctamente...")
+    
+    @Rule(Proyecto(requisitos=MATCH.requisitos & CONTAINS('colaboracion'), id_proyecto=MATCH.id_proyecto))
+    def generar_sprint_colaboracion(self, requisitos, id_proyecto):
+        print("Iniciando búsqueda en la base de datos...")
+
+        # Buscar los sprints en sprints_bc 
+        resultados = buscar_por_palabra_clave('colaboracion')
+
+        # Agregar los resultados a Sprints
+        agregar_sprints(resultados, id_proyecto)
+
+        print("Sprints agregados correctamente...")
+    
+    @Rule(Proyecto(requisitos=MATCH.requisitos & CONTAINS('analisis y reportes'), id_proyecto=MATCH.id_proyecto))
+    def generar_sprint_colaboracion(self, requisitos, id_proyecto):
+        print("Iniciando búsqueda en la base de datos...")
+
+        # Buscar los sprints en sprints_bc 
+        resultados = buscar_por_palabra_clave('colaboracion')
+
+        # Agregar los resultados a Sprints
+        agregar_sprints(resultados, id_proyecto)
+
+        print("Sprints agregados correctamente...")
+
     # Regla para agregar sprint de final por defecto
     @Rule(Proyecto(id_proyecto=MATCH.id_proyecto))
     def agregar_sprint_final(self, id_proyecto):

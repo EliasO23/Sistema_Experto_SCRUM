@@ -231,9 +231,9 @@
                             let li = document.createElement('li');
                             li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
                             li.innerHTML = `
-                        ${user.nombre} 
-                        <button class="btn btn-primary btn-sm" onclick="seleccionarUsuario(${user.id_usuario}, '${user.nombre}')">Seleccionar</button>
-                    `;
+                                ${user.nombre} 
+                                <button class="btn btn-primary btn-sm" onclick="seleccionarUsuario(${user.id_usuario}, '${user.nombre}')">Seleccionar</button>
+                            `;
                             results.appendChild(li);
                         });
                     }
@@ -246,20 +246,20 @@
             let li = document.createElement('li');
             li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
             li.innerHTML = `
-        ${nombre}
-        <select class="form-select form-select-sm" name="rol" onchange="actualizarExperiencia(this)">
-            <option value="product_owner">Product Owner</option>
-            <option value="developer">Developer</option>
-            <option value="admin">Admin</option>
-            <option value="scrum_master">Scrum Master</option>
-        </select>
-        <select class="form-select form-select-sm" name="experiencia" style="display: none;">
-            <option value="junior">Junior</option>
-            <option value="intermedio">Intermedio</option>
-            <option value="senior">Senior</option>
-        </select>
-        <button class="btn btn-danger btn-sm" onclick="eliminarUsuario(this)">Quitar</button>
-    `;
+                ${nombre}
+                <select class="form-select form-select-sm" name="rol" onchange="actualizarExperiencia(this)">
+                    <option value="product_owner">Product Owner</option>
+                    <option value="developer">Developer</option>
+                    <option value="admin">Admin</option>
+                    <option value="scrum_master">Scrum Master</option>
+                </select>
+                <select class="form-select form-select-sm" name="experiencia" style="display: none;">
+                    <option value="junior">Junior</option>
+                    <option value="intermedio">Intermedio</option>
+                    <option value="senior">Senior</option>
+                </select>
+                <button class="btn btn-danger btn-sm" onclick="eliminarUsuario(this)">Quitar</button>
+            `;
             li.dataset.id = id;
             selectedList.appendChild(li);
         }
@@ -285,14 +285,31 @@
         // Agregar usuarios al equipo
         function agregarEquipo() {
             let users = [];
+            let valid = true;
+
             document.querySelectorAll('#selected-users li').forEach(li => {
                 let id = li.dataset.id;
                 let rol = li.querySelector('select[name="rol"]').value;
                 let experiencia = li.querySelector('select[name="experiencia"]').style.display === 'none'
-                    ? null // No asignar experiencia si no es visible
+                    ? null
                     : li.querySelector('select[name="experiencia"]').value;
+
+                if (!rol) {
+                    alert("Por favor selecciona un rol para todos los usuarios.");
+                    valid = false;
+                    return;
+                }
+
+                if (rol === "developer" && !experiencia) {
+                    alert(`Por favor selecciona la experiencia para el rol de Developer para el usuario ${li.textContent.trim()}.`);
+                    valid = false;
+                    return;
+                }
+
                 users.push({ id, rol, experiencia });
             });
+
+            if (!valid) return;
 
             fetch('/agregar_equipo', {
                 method: 'POST',
@@ -305,11 +322,10 @@
                 .then(response => response.json())
                 .then(data => {
                     alert(data.message);
-                    // Vaciar la lista de usuarios seleccionados después de agregar
                     document.getElementById('selected-users').innerHTML = '';
-                    document.getElementById('user-search').value = ''; // Limpiar el campo de búsqueda
-                    // Actualizar la lista de usuarios en el proyecto
+                    document.getElementById('user-search').value = '';
                     actualizarListaUsuarios(data.usuarios);
+                    location.reload();
                 })
                 .catch(error => console.error('Error:', error));
         }
@@ -320,9 +336,9 @@
             usuariosLista.innerHTML = ''; // Limpiar la lista actual
 
             usuarios.forEach(usuario => {
-                    let li = document.createElement('li');
-                    li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
-                    li.innerHTML = `
+                let li = document.createElement('li');
+                li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+                li.innerHTML = `
                 ${usuario.nombre} - ${usuario.rol}
                 <button class="btn btn-danger btn-sm" onclick="eliminarUsuarioDelProyecto('${usuario.id_proyecto}', '${usuario.id_usuario}')">Quitar</button>
             `;

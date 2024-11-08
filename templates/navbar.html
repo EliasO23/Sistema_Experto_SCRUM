@@ -7,7 +7,7 @@
         <li><a href="{{url_for('views.projects')}}">Proyectos</a></li>
         {% if has_project %}
             <li><a href="{{ url_for('views.sprints', id_proyecto=proyecto.id_proyecto) }}">Sprints</a></li>
-            <li><a href="#">Tareas</a></li>
+            <li><a href="https://docs.google.com/document/d/1ngDmnfI5oPZ1pj6AN2cvgOiW_8tU9ajBCIa33M4ZTMs/edit?usp=sharing" target="_blank">Ayuda</a></li>
         {% endif %}
     </ul>
     <button class="logout-button">
