@@ -9,7 +9,7 @@ Este proyecto es un sistema experto desarrollado en Python para asistir en la ge
 - Python 3.8 o superior
 - Git
 - Entorno virtual con `venv`
-- MariaDB o MySQL (para la base de datos)
+- MariaDB (para la base de datos)
 
 ---
 
@@ -28,14 +28,17 @@ Este proyecto es un sistema experto desarrollado en Python para asistir en la ge
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/tu-usuario/sistema-experto-scrum.git
-cd sistema-experto-scrum
+git clone https://github.com/EliasO23/Sistema_Experto_SCRUM.git
+cd Sistema_Experto_SCRUM
+```
 
 ### 2. Crear y activar un entorno virtual
 
 ```bash
 python -m venv venv
-source venv\Scripts\activate
+```
+```bash
+venv\Scripts\activate
 ```
 
 ### 3. Instalar las dependencias
@@ -46,7 +49,7 @@ pip install -r requirements.txt
 
 ### 4. Configurar la base de datos
 
-1. Crear una base de datos en MariaDB o MySQL.
+1. Crear una base de datos en MariaDB.
 2. Configurar las credenciales de la base de datos en el archivo `app.py` colocando usuario y contraseña.
 
 ### 5. Ejecutar la aplicación
@@ -68,7 +71,7 @@ Cada vez que se cierre o salga del proyecto, asegúrate de realizar los siguient
 1. Activar el entorno virtual:
 
     ```bash
-    source venv\Scripts\activate
+    venv\Scripts\activate
     ```
 
 2. Ejecutar la aplicación:
