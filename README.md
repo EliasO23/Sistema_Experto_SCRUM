@@ -29,6 +29,8 @@ Este proyecto es un sistema experto desarrollado en Python para asistir en la ge
 
 ```bash
 git clone https://github.com/EliasO23/Sistema_Experto_SCRUM.git
+```
+```bash
 cd Sistema_Experto_SCRUM
 ```
 
